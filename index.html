@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    label, input, textarea, select { display: block; margin: 10px 0; width: 100%; }
+    button { padding: 10px; margin-top: 10px; }
+    .entry { border-bottom: 1px solid #ccc; padding: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Seizure & Heart Rate Tracker</h1>
+  <form id="logForm">
+    <label for="heartRate">Heart Rate (bpm):</label>
+    <input type="number" id="heartRate" required>
+
+    <label for="seizureLevel">Seizure Activity (1–10):</label>
+    <input type="number" id="seizureLevel" min="1" max="10" required>
+
+    <label for="symptoms">Symptoms / Notes:</label>
+    <textarea id="symptoms" rows="3"></textarea>
+
+    <button type="submit">Log Entry</button>
+  </form>
+
+  <h2>Previous Logs</h2>
+  <div id="logEntries"></div>
+
+  <script>
+    const form = document.getElementById('logForm');
+    const logContainer = document.getElementById('logEntries');
+
+    function loadLogs() {
+      const logs = JSON.parse(localStorage.getItem('healthLogs')) || [];
+      logContainer.innerHTML = '';
+      logs.reverse().forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'entry';
+        div.innerHTML = `
+          <strong>${new Date(entry.time).toLocaleString()}</strong><br>
+          Heart Rate: ${entry.heartRate} bpm<br>
+          Seizure Level: ${entry.seizureLevel}/10<br>
+          Notes: ${entry.symptoms || 'None'}
+        `;
+        logContainer.appendChild(div);
+      });
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const log = {
+        heartRate: form.heartRate.value,
+        seizureLevel: form.seizureLevel.value,
+        symptoms: form.symptoms.value,
+        time: new Date().toISOString()
+      };
+
+      const logs = JSON.parse(localStorage.getItem('healthLogs')) || [];
+      logs.push(log);
+      localStorage.setItem('healthLogs', JSON.stringify(logs));
+      form.reset();
+      loadLogs();
+    });
+
+    loadLogs();
+  </script>
+</body>
+</html>
